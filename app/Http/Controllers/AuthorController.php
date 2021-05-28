@@ -27,7 +27,7 @@ class AuthorController extends Controller
     public function index()
     {
         $authors = Author::all();
-        return $authors;
+        return $this->successResponse($authors);
     }
 
     /**
@@ -36,6 +36,26 @@ class AuthorController extends Controller
      */
     public function store(Request $request)
     {
+
+        $validate = [
+            'name' => 'required|max:255',
+            'gender' => 'required|in:male,famale',
+            'country' => 'required',
+        ];
+        $messages = [
+            'name.required' => 'Campo Name é obrigatório!',
+            'name.max' => 'Campo Name deve possuir no máximo 10 caracteres!',
+            'gender.required' => 'Campo Gender é obrigatório!',
+            'gender.in' => 'Gender somente male ou female!',
+            'country.required' => 'Campo Country é obrigatório!',
+        ];
+
+
+        $this->validate($request, $validate, $messages);
+
+        $author = Author::create($request->all());
+
+        return $this->successResponse($author, Response::HTTP_CREATED);
     }
 
     /**
