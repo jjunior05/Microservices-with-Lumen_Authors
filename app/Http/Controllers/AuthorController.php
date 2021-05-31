@@ -39,7 +39,7 @@ class AuthorController extends Controller
 
         $validate = [
             'name' => 'required|max:255',
-            'gender' => 'required|in:male,famale',
+            'gender' => 'required|in:male,female',
             'country' => 'required',
         ];
         $messages = [
@@ -75,6 +75,25 @@ class AuthorController extends Controller
      */
     public function update(Request $request, $author)
     {
+        dd($request->input('name'));
+        $author = Author::findOrFail($author);
+
+        $validate = [
+            'name' => 'required|max:255',
+            'gender' => 'required|in:male,famale',
+            'country' => 'required',
+        ];
+        $messages = [
+            'name.required' => 'Campo Name é obrigatório!',
+            'name.max' => 'Campo Name deve possuir no máximo 10 caracteres!',
+            'gender.required' => 'Campo Gender é obrigatório!',
+            'gender.in' => 'Gender somente male ou female!',
+            'country.required' => 'Campo Country é obrigatório!',
+        ];
+
+        $this->validate($request, $validate, $messages);
+
+        $author->name = $request->input('name');
     }
 
     /**
