@@ -26,7 +26,7 @@ class AuthorController extends Controller
      */
     public function index()
     {
-        $authors = Author::all();
+        $authors = Author::orderBy('id', 'DESC')->get();
         return $this->successResponse($authors);
     }
 
@@ -75,26 +75,34 @@ class AuthorController extends Controller
      */
     public function update(Request $request, $author)
     {
-        dd($request->input('name'));
-        $author = Author::findOrFail($author);
+
 
         $validate = [
-            'name' => 'required|max:255',
-            'gender' => 'required|in:male,famale',
-            'country' => 'required',
+            'name' => '|max:255',
+            'gender' => '|in:male,famale',
+
         ];
         $messages = [
-            'name.required' => 'Campo Name é obrigatório!',
             'name.max' => 'Campo Name deve possuir no máximo 10 caracteres!',
-            'gender.required' => 'Campo Gender é obrigatório!',
             'gender.in' => 'Gender somente male ou female!',
             'country.required' => 'Campo Country é obrigatório!',
         ];
 
         $this->validate($request, $validate, $messages);
 
-        $author->name = $request->input('name');
+        $author = Author::findOrFail($author);
+
+        $author->fill($request->all());
+
+        if ($author->isClean()) {
+            return $this->errorResponse('Não foi possível alterar nenhum valor com as informações informadas.', Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $author->save();
+
+        return $this->successResponse($author);
     }
+
 
     /**
      * Delete an existing author
@@ -102,5 +110,13 @@ class AuthorController extends Controller
      */
     public function destroy($author)
     {
+        $author = Author::findOrFail($author);
+        if (!$author) {
+            return $this->errorResponse('Não foi possível encontrar nenhum author com esse ID', Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $author->delete();
+
+        return $this->successResponse($author);
     }
 }
